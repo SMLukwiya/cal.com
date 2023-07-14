@@ -9,6 +9,7 @@ import type { TimeUnit } from "@calcom/prisma/enums";
 import { WorkflowActions, WorkflowMethods, WorkflowTemplates } from "@calcom/prisma/enums";
 import { WorkflowTriggerEvents } from "@calcom/prisma/enums";
 import { bookingMetadataSchema } from "@calcom/prisma/zod-utils";
+import { TimeFormat } from "@calcom/lib/timeFormat";
 
 import type { BookingInfo, timeUnitLowerCase } from "./smsReminderManager";
 import type { VariablesType } from "./templates/customTemplate";
@@ -61,6 +62,12 @@ export const scheduleEmailReminder = async (
     return;
   }
 
+  async function getCurrentUserTimeFormat() {
+    const user = await prisma.user.findUnique({ where: { email: evt.organizer.email } });
+    return user?.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR;
+  }
+  const timeFormat = await getCurrentUserTimeFormat();
+
   let name = "";
   let attendeeName = "";
   let timeZone = "";
@@ -91,6 +98,7 @@ export const scheduleEmailReminder = async (
       eventDate: dayjs(startTime).tz(timeZone),
       eventEndTime: dayjs(endTime).tz(timeZone),
       timeZone: timeZone,
+      timeFormat: timeFormat,
       location: evt.location,
       additionalNotes: evt.additionalNotes,
       responses: evt.responses,
@@ -111,6 +119,7 @@ export const scheduleEmailReminder = async (
     emailContent = emailReminderTemplate(
       false,
       action,
+      timeFormat,
       startTime,
       endTime,
       evt.title,

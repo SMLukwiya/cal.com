@@ -3,6 +3,7 @@ import type { Dayjs } from "@calcom/dayjs";
 import dayjs from "@calcom/dayjs";
 import { APP_NAME, WEBAPP_URL } from "@calcom/lib/constants";
 import type { CalEventResponses } from "@calcom/types/Calendar";
+import type { TimeFormat } from "@calcom/lib/timeFormat";
 
 export type VariablesType = {
   eventName?: string;
@@ -12,6 +13,7 @@ export type VariablesType = {
   eventDate?: Dayjs;
   eventEndTime?: Dayjs;
   timeZone?: string;
+  timeFormat?: TimeFormat;  
   location?: string | null;
   additionalNotes?: string | null;
   responses?: CalEventResponses | null;
@@ -49,9 +51,9 @@ const customTemplate = (
     .replaceAll("{ORGANIZER_NAME}", variables.organizerName || "") //old variable names
     .replaceAll("{ATTENDEE_NAME}", variables.attendeeName || "") //old variable names
     .replaceAll("{EVENT_DATE}", translatedDate)
-    .replaceAll("{EVENT_TIME}", variables.eventDate?.format("H:mmA") || "")
-    .replaceAll("{START_TIME}", variables.eventDate?.format("H:mmA") || "")
-    .replaceAll("{EVENT_END_TIME}", variables.eventEndTime?.format("H:mmA") || "")
+    .replaceAll("{EVENT_TIME}", variables.eventDate?.format(variables.timeFormat || "h:mmA") || "")
+    .replaceAll("{START_TIME}", variables.eventDate?.format(variables.timeFormat || "h:mmA") || "")
+    .replaceAll("{EVENT_END_TIME}", variables.eventEndTime?.format(variables.timeFormat || "h:mmA") || "")
     .replaceAll("{LOCATION}", locationString)
     .replaceAll("{ADDITIONAL_NOTES}", variables.additionalNotes || "")
     .replaceAll("{ATTENDEE_EMAIL}", variables.attendeeEmail || "")

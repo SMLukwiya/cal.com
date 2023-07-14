@@ -5,6 +5,7 @@ import dayjs from "@calcom/dayjs";
 import { getCalEventResponses } from "@calcom/features/bookings/lib/getCalEventResponses";
 import { defaultHandler } from "@calcom/lib/server";
 import prisma from "@calcom/prisma";
+import { TimeFormat } from "@calcom/lib/timeFormat";
 import { WorkflowActions, WorkflowMethods, WorkflowTemplates } from "@calcom/prisma/enums";
 import { bookingMetadataSchema } from "@calcom/prisma/zod-utils";
 
@@ -89,6 +90,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let message: string | null = reminder.workflowStep.reminderBody;
 
+      const user = await prisma.user.findUnique({ where: { email: reminder.booking?.user?.email || "" } });
+      const timeFormat = user?.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR;
+
       if (reminder.workflowStep.reminderBody) {
         const { responses } = getCalEventResponses({
           bookingFields: reminder.booking.eventType?.bookingFields ?? null,
@@ -103,6 +107,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           eventDate: dayjs(reminder.booking?.startTime).tz(timeZone),
           eventEndTime: dayjs(reminder.booking?.endTime).tz(timeZone),
           timeZone: timeZone,
+          timeFormat: timeFormat,
           location: reminder.booking?.location || "",
           additionalNotes: reminder.booking?.description,
           responses: responses,
@@ -120,6 +125,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         message = smsReminderTemplate(
           false,
           reminder.workflowStep.action,
+          timeFormat,
           reminder.booking?.startTime.toISOString() || "",
           reminder.booking?.eventType?.title || "",
           timeZone || "",

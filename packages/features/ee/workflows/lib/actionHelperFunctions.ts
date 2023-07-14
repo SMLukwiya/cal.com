@@ -1,5 +1,6 @@
 import { WorkflowActions, WorkflowTemplates, WorkflowTriggerEvents } from "@prisma/client";
 import { whatsappEventCancelledTemplate, whatsappEventCompletedTemplate, whatsappEventRescheduledTemplate, whatsappReminderTemplate } from "../lib/reminders/templates/whatsapp";
+import type { TimeFormat } from "@calcom/lib/timeFormat";
 
 export function isSMSAction(action: WorkflowActions) {
   return action === WorkflowActions.SMS_ATTENDEE || action === WorkflowActions.SMS_NUMBER;
@@ -49,7 +50,7 @@ export function getWhatsappTemplateFunction(template: WorkflowTemplates): typeof
   }
 }
 
-export function getWhatsappTemplateForAction(action: WorkflowActions, template: WorkflowTemplates): string | null {
+export function getWhatsappTemplateForAction(action: WorkflowActions, template: WorkflowTemplates, timeFormat: TimeFormat): string | null {
   const templateFunction = getWhatsappTemplateFunction(template)
-  return templateFunction(true, action)
+  return templateFunction(true, action, timeFormat)
 }

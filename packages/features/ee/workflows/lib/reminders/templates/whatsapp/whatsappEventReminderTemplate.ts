@@ -1,10 +1,12 @@
-import { WorkflowActions } from "@prisma/client";
+import type { TimeFormat } from "@calcom/lib/timeFormat";
+import { WorkflowActions } from "@calcom/prisma/enums";
 
 import dayjs from "@calcom/dayjs";
 
 export const whatsappReminderTemplate = (
   isEditingMode: boolean,
   action?: WorkflowActions,
+  timeFormat?: TimeFormat,
   startTime?: string,
   eventName?: string,
   timeZone?: string,
@@ -22,7 +24,7 @@ export const whatsappReminderTemplate = (
     name = action === WorkflowActions.WHATSAPP_ATTENDEE ? "{ATTENDEE}" : "{ORGANIZER}";
   } else {
     eventDate = dayjs(startTime).tz(timeZone).format("YYYY MMM D");
-    startTime = dayjs(startTime).tz(timeZone).format("h:mmA");
+    startTime = dayjs(startTime).tz(timeZone).format(timeFormat || "h:mmA");
   }
 
   const templateOne = `Hi${

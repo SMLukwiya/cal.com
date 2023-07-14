@@ -7,6 +7,7 @@ import { WorkflowTemplates, WorkflowActions, WorkflowMethods } from "@calcom/pri
 import { WorkflowTriggerEvents } from "@calcom/prisma/enums";
 import { bookingMetadataSchema } from "@calcom/prisma/zod-utils";
 import type { CalEventResponses } from "@calcom/types/Calendar";
+import { TimeFormat } from "@calcom/lib/timeFormat";
 
 import { getSenderId } from "../alphanumericSenderIdSupport";
 import * as twilio from "./smsProviders/twilioProvider";
@@ -83,6 +84,12 @@ export const scheduleSMSReminder = async (
   }
   const isNumberVerified = await getIsNumberVerified();
 
+  async function getCurrentUserTimeFormat() {
+    const user = await prisma.user.findUnique({ where: { email: evt.organizer.email } });
+    return user?.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR;
+  }
+  const timeFormat = await getCurrentUserTimeFormat();
+
   if (triggerEvent === WorkflowTriggerEvents.BEFORE_EVENT) {
     scheduledDate = timeSpan.time && timeUnit ? dayjs(startTime).subtract(timeSpan.time, timeUnit) : null;
   } else if (triggerEvent === WorkflowTriggerEvents.AFTER_EVENT) {
@@ -108,6 +115,7 @@ export const scheduleSMSReminder = async (
       eventDate: dayjs(evt.startTime).tz(timeZone),
       eventEndTime: dayjs(evt.endTime).tz(timeZone),
       timeZone: timeZone,
+      timeFormat: timeFormat,
       location: evt.location,
       additionalNotes: evt.additionalNotes,
       responses: evt.responses,
@@ -119,7 +127,7 @@ export const scheduleSMSReminder = async (
     message = customMessage.text;
   } else if (template === WorkflowTemplates.REMINDER) {
     message =
-      smsReminderTemplate(false, action, evt.startTime, evt.title, timeZone, attendeeName, name) || message;
+      smsReminderTemplate(false, action, timeFormat, evt.startTime, evt.title, timeZone, attendeeName, name) || message;
   }
 
   // Allows debugging generated email content without waiting for sendgrid to send emails
