@@ -18,6 +18,7 @@ import hasKeyInMetadata from "@calcom/lib/hasKeyInMetadata";
 import type { PrismaClient } from "@calcom/prisma/client";
 import { BookingStatus, WorkflowActions, WorkflowMethods, WorkflowTriggerEvents } from "@calcom/prisma/enums";
 import type { TrpcSessionUser } from "@calcom/trpc/server/trpc";
+import { TimeFormat } from "@calcom/lib/timeFormat";
 
 import { TRPCError } from "@trpc/server";
 
@@ -276,8 +277,9 @@ export const updateHandler = async ({ ctx, input }: UpdateOptions) => {
                     name: booking.user.name || "",
                     email: booking.user.email,
                     timeZone: booking.user.timeZone,
+                    timeFormat: booking.user.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR,
                   }
-                : { name: "", email: "", timeZone: "", language: { locale: "" } },
+                : { name: "", email: "", timeZone: "", language: { locale: "" }, timeFormat: TimeFormat.TWELVE_HOUR },
               startTime: booking.startTime.toISOString(),
               endTime: booking.endTime.toISOString(),
               title: booking.title,
@@ -498,8 +500,9 @@ export const updateHandler = async ({ ctx, input }: UpdateOptions) => {
                   name: booking.user.name || "",
                   email: booking.user.email,
                   timeZone: booking.user.timeZone,
+                  timeFormat: booking.user.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR
                 }
-              : { name: "", email: "", timeZone: "", language: { locale: "" } },
+              : { name: "", email: "", timeZone: "", language: { locale: "" }, timeFormat: TimeFormat.TWELVE_HOUR },
             startTime: booking.startTime.toISOString(),
             endTime: booking.endTime.toISOString(),
             title: booking.title,
@@ -643,8 +646,9 @@ export const updateHandler = async ({ ctx, input }: UpdateOptions) => {
                     email: booking.user.email,
                     timeZone: booking.user.timeZone,
                     language: { locale: booking.user.locale || "" },
+                    timeFormat: booking.user.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR
                   }
-                : { name: "", email: "", timeZone: "", language: { locale: "" } },
+                : { name: "", email: "", timeZone: "", language: { locale: "" }, timeFormat: TimeFormat.TWELVE_HOUR },
               startTime: booking.startTime.toISOString(),
               endTime: booking.endTime.toISOString(),
               title: booking.title,

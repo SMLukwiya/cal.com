@@ -61,16 +61,11 @@ export const scheduleEmailReminder = async (
     console.error("Sendgrid credentials are missing from the .env file");
     return;
   }
-
-  async function getCurrentUserTimeFormat() {
-    const user = await prisma.user.findUnique({ where: { email: evt.organizer.email } });
-    return user?.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR;
-  }
-  const timeFormat = await getCurrentUserTimeFormat();
-
+  
   let name = "";
   let attendeeName = "";
   let timeZone = "";
+  const timeFormat = evt.organizer.timeFormat;
 
   switch (action) {
     case WorkflowActions.EMAIL_HOST:

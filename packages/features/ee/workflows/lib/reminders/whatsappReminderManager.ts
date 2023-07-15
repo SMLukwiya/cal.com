@@ -59,12 +59,7 @@ export const scheduleWhatsappReminder = async (
   const attendeeName = action === WorkflowActions.WHATSAPP_ATTENDEE ? evt.organizer.name : evt.attendees[0].name;
   const timeZone =
     action === WorkflowActions.WHATSAPP_ATTENDEE ? evt.attendees[0].timeZone : evt.organizer.timeZone;
-
-  async function getCurrentUserTimeFormat() {
-    const user = await prisma.user.findUnique({ where: { email: evt.organizer.email } });
-    return user?.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR;
-  }
-  const timeFormat = await getCurrentUserTimeFormat();
+  const timeFormat = evt.organizer.timeFormat;
 
   switch(template) {
     case WorkflowTemplates.REMINDER:

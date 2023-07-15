@@ -53,7 +53,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     },
   });
 
-  if (!unscheduledReminders.length) res.json({ ok: true });
+  if (!unscheduledReminders.length) {
+    res.json({ ok: true });
+    return;
+  }
 
   for (const reminder of unscheduledReminders) {
     if (!reminder.workflowStep || !reminder.booking) {
@@ -80,6 +83,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           ? reminder.booking?.attendees[0].timeZone
           : reminder.booking?.user?.timeZone;
 
+      const timeFormat = reminder.booking?.user?.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR;
+
       const senderID = getSenderId(sendTo, reminder.workflowStep.sender);
 
       const locale =
@@ -89,9 +94,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           : reminder.booking?.user?.locale;
 
       let message: string | null = reminder.workflowStep.reminderBody;
-
-      const user = await prisma.user.findUnique({ where: { email: reminder.booking?.user?.email || "" } });
-      const timeFormat = user?.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR;
 
       if (reminder.workflowStep.reminderBody) {
         const { responses } = getCalEventResponses({

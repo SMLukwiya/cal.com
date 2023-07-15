@@ -163,6 +163,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         reminder.workflowStep.action === WorkflowActions.SMS_ATTENDEE
           ? reminder.booking.attendees[0].locale
           : reminder.booking.user?.locale;
+      
+      const timeFormat = reminder.booking?.user?.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR;
 
       let emailContent = {
         emailSubject: reminder.workflowStep.emailSubject || "",
@@ -170,9 +172,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       };
 
       let emailBodyEmpty = false;
-
-      const user = await prisma.user.findUnique({ where: { email: reminder.booking?.user?.email || "" } });
-      const timeFormat = user?.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR;
 
       if (reminder.workflowStep.reminderBody) {
         const { responses } = getCalEventResponses({

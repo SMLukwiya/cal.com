@@ -30,6 +30,7 @@ export type BookingInfo = {
     name: string;
     email: string;
     timeZone: string;
+    timeFormat?: TimeFormat;
     username?: string;
   };
   eventType: {
@@ -84,12 +85,6 @@ export const scheduleSMSReminder = async (
   }
   const isNumberVerified = await getIsNumberVerified();
 
-  async function getCurrentUserTimeFormat() {
-    const user = await prisma.user.findUnique({ where: { email: evt.organizer.email } });
-    return user?.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR;
-  }
-  const timeFormat = await getCurrentUserTimeFormat();
-
   if (triggerEvent === WorkflowTriggerEvents.BEFORE_EVENT) {
     scheduledDate = timeSpan.time && timeUnit ? dayjs(startTime).subtract(timeSpan.time, timeUnit) : null;
   } else if (triggerEvent === WorkflowTriggerEvents.AFTER_EVENT) {
@@ -100,6 +95,7 @@ export const scheduleSMSReminder = async (
   const attendeeName = action === WorkflowActions.SMS_ATTENDEE ? evt.organizer.name : evt.attendees[0].name;
   const timeZone =
     action === WorkflowActions.SMS_ATTENDEE ? evt.attendees[0].timeZone : evt.organizer.timeZone;
+  const timeFormat = evt.organizer.timeFormat;
 
   const locale =
     action === WorkflowActions.EMAIL_ATTENDEE || action === WorkflowActions.SMS_ATTENDEE
