@@ -64,6 +64,7 @@ export const scheduleEmailReminder = async (
   let name = "";
   let attendeeName = "";
   let timeZone = "";
+  const timeFormat = evt.organizer.timeFormat;
 
   switch (action) {
     case WorkflowActions.EMAIL_HOST:
@@ -91,6 +92,7 @@ export const scheduleEmailReminder = async (
       eventDate: dayjs(startTime).tz(timeZone),
       eventEndTime: dayjs(endTime).tz(timeZone),
       timeZone: timeZone,
+      timeFormat: timeFormat,
       location: evt.location,
       additionalNotes: evt.additionalNotes,
       responses: evt.responses,
@@ -111,6 +113,7 @@ export const scheduleEmailReminder = async (
     emailContent = emailReminderTemplate(
       false,
       action,
+      timeFormat,
       startTime,
       endTime,
       evt.title,

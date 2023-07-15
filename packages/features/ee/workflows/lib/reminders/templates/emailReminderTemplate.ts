@@ -1,10 +1,12 @@
 import dayjs from "@calcom/dayjs";
 import { APP_NAME } from "@calcom/lib/constants";
 import { WorkflowActions } from "@calcom/prisma/enums";
+import type { TimeFormat } from "@calcom/lib/timeFormat";
 
 const emailReminderTemplate = (
   isEditingMode: boolean,
   action?: WorkflowActions,
+  timeFormat?: TimeFormat,
   startTime?: string,
   endTime?: string,
   eventName?: string,
@@ -23,9 +25,9 @@ const emailReminderTemplate = (
     name = action === WorkflowActions.EMAIL_ATTENDEE ? "{ATTENDEE}" : "{ORGANIZER}";
     eventDate = "{EVENT_DATE_ddd, MMM D, YYYY H:mmA}";
   } else {
-    eventDate = dayjs(startTime).tz(timeZone).format("ddd, MMM D, YYYY H:mmA");
+    eventDate = dayjs(startTime).tz(timeZone).format(`ddd, MMM D, YYYY ${timeFormat || "h:mmA"}`);
 
-    endTime = dayjs(endTime).tz(timeZone).format("H:mmA");
+    endTime = dayjs(endTime).tz(timeZone).format(timeFormat || "h:mmA");
   }
   const emailSubject = `Reminder: ${eventName} - ${eventDate}`;
 
@@ -33,11 +35,11 @@ const emailReminderTemplate = (
     name ? " " + name : ""
   },<br><br>This is a reminder about your upcoming event.<br><br>`;
 
-  const eventHtml = `<div><strong class="editor-text-bold">Event:</strong></div>${eventName}<br><br>`;
+  const eventHtml = `<div><strong class="editor-text-bold">Event:</strong>&nbsp</div>${eventName}<br><br>`;
 
-  const dateTimeHtml = `<div><strong class="editor-text-bold">Date & Time:</strong></div>${eventDate} - ${endTime} (${timeZone})<br><br>`;
+  const dateTimeHtml = `<div><strong class="editor-text-bold">Date & Time:</strong>&nbsp</div>${eventDate} - ${endTime} (${timeZone})<br><br>`;
 
-  const attendeeHtml = `<div><strong class="editor-text-bold">Attendees:</strong></div>You & ${otherPerson}<br><br>`;
+  const attendeeHtml = `<div><strong class="editor-text-bold">Attendees:</strong>&nbsp</div>You & ${otherPerson}<br><br>`;
 
   const branding = !isBrandingDisabled && !isEditingMode ? `<br><br>_<br><br>Scheduling by ${APP_NAME}` : "";
 

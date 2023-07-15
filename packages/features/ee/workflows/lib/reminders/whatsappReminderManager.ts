@@ -1,5 +1,5 @@
 import type { TimeUnit } from "@prisma/client";
-import { WorkflowTriggerEvents, WorkflowTemplates, WorkflowActions, WorkflowMethods } from "@prisma/client";
+import { WorkflowTriggerEvents, WorkflowTemplates, WorkflowActions, WorkflowMethods } from "@calcom/prisma/enums";
 
 import dayjs from "@calcom/dayjs";
 import prisma from "@calcom/prisma";
@@ -58,22 +58,23 @@ export const scheduleWhatsappReminder = async (
   const attendeeName = action === WorkflowActions.WHATSAPP_ATTENDEE ? evt.organizer.name : evt.attendees[0].name;
   const timeZone =
     action === WorkflowActions.WHATSAPP_ATTENDEE ? evt.attendees[0].timeZone : evt.organizer.timeZone;
+  const timeFormat = evt.organizer.timeFormat;
 
   switch(template) {
     case WorkflowTemplates.REMINDER:
-      message = whatsappReminderTemplate(false, action, evt.startTime, evt.title, timeZone, attendeeName, name) || message;
+      message = whatsappReminderTemplate(false, action, timeFormat, evt.startTime, evt.title, timeZone, attendeeName, name) || message;
       break;
     case WorkflowTemplates.CANCELLED:
-      message = whatsappEventCancelledTemplate(false, action, evt.startTime, evt.title, timeZone, attendeeName, name) || message;
+      message = whatsappEventCancelledTemplate(false, action, timeFormat, evt.startTime, evt.title, timeZone, attendeeName, name) || message;
       break
     case WorkflowTemplates.RESCHEDULED:
-      message = whatsappEventRescheduledTemplate(false, action, evt.startTime, evt.title, timeZone, attendeeName, name) || message;
+      message = whatsappEventRescheduledTemplate(false, action, timeFormat, evt.startTime, evt.title, timeZone, attendeeName, name) || message;
       break;
     case WorkflowTemplates.COMPLETED:
-      message = whatsappEventCompletedTemplate(false, action, evt.startTime, evt.title, timeZone, attendeeName, name) || message;
+      message = whatsappEventCompletedTemplate(false, action, timeFormat, evt.startTime, evt.title, timeZone, attendeeName, name) || message;
       break
     default:
-      message = whatsappReminderTemplate(false, action, evt.startTime, evt.title, timeZone, attendeeName, name) || message;
+      message = whatsappReminderTemplate(false, action, timeFormat, evt.startTime, evt.title, timeZone, attendeeName, name) || message;
   }
 
   // Allows debugging generated whatsapp content without waiting for twilio to send whatsapp messages
