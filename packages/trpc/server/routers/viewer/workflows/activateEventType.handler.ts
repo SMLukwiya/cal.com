@@ -15,7 +15,7 @@ import { prisma } from "@calcom/prisma";
 import { BookingStatus } from "@calcom/prisma/client";
 import { MembershipRole, WorkflowActions, WorkflowMethods } from "@calcom/prisma/enums";
 import type { TrpcSessionUser } from "@calcom/trpc/server/trpc";
-import {TimeFormat} from "@calcom/lib/timeFormat";
+import {getDefaultUserTimeFormat} from "@calcom/lib/timeFormat";
 
 import { TRPCError } from "@trpc/server";
 
@@ -172,9 +172,9 @@ export const activateEventTypeHandler = async ({ ctx, input }: ActivateEventType
               email: booking.user.email,
               timeZone: booking.user.timeZone,
               language: { locale: booking.user.locale || "" },
-              timeFormat: booking.user.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR
+              timeFormat: getDefaultUserTimeFormat(booking.user.timeFormat)
             }
-          : { name: "", email: "", timeZone: "", language: { locale: "" }, timeFormat: TimeFormat.TWELVE_HOUR },
+          : { name: "", email: "", timeZone: "", language: { locale: "" }, timeFormat: getDefaultUserTimeFormat() },
         startTime: booking.startTime.toISOString(),
         endTime: booking.endTime.toISOString(),
         title: booking.title,

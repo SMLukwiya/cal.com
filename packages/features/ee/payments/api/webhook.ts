@@ -17,6 +17,7 @@ import { getTranslation } from "@calcom/lib/server/i18n";
 import { prisma, bookingMinimalSelect } from "@calcom/prisma";
 import { BookingStatus } from "@calcom/prisma/enums";
 import { EventTypeMetaDataSchema } from "@calcom/prisma/zod-utils";
+import {getDefaultUserTimeFormat} from "@calcom/lib/timeFormat";
 import type { CalendarEvent } from "@calcom/types/Calendar";
 
 export const config = {
@@ -59,6 +60,7 @@ async function getBooking(bookingId: number) {
           id: true,
           username: true,
           timeZone: true,
+          timeFormat: true,
           email: true,
           name: true,
           locale: true,
@@ -110,6 +112,7 @@ async function getBooking(bookingId: number) {
       timeZone: user.timeZone,
       language: { translate: t, locale: user.locale ?? "en" },
       id: user.id,
+      timeFormat: getDefaultUserTimeFormat(user.timeFormat)
     },
     attendees: attendeesList,
     uid: booking.uid,
@@ -163,6 +166,7 @@ async function handlePaymentSuccess(event: Stripe.Event) {
           username: true,
           credentials: true,
           timeZone: true,
+          timeFormat: true,
           email: true,
           name: true,
           locale: true,
@@ -217,6 +221,7 @@ async function handlePaymentSuccess(event: Stripe.Event) {
       name: user.name!,
       timeZone: user.timeZone,
       language: { translate: t, locale: user.locale ?? "en" },
+      timeFormat: getDefaultUserTimeFormat(user.timeFormat)
     },
     attendees: attendeesList,
     location: booking.location,

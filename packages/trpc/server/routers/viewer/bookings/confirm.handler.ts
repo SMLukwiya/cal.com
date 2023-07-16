@@ -9,6 +9,7 @@ import type { EventTypeInfo } from "@calcom/features/webhooks/lib/sendPayload";
 import { isPrismaObjOrUndefined, parseRecurringEvent } from "@calcom/lib";
 import { getTranslation } from "@calcom/lib/server";
 import { prisma } from "@calcom/prisma";
+import { getDefaultUserTimeFormat } from "@calcom/lib/timeFormat";
 import { BookingStatus, MembershipRole, SchedulingType, WebhookTriggerEvents } from "@calcom/prisma/enums";
 import type { CalendarEvent } from "@calcom/types/Calendar";
 import type { IAbstractPaymentService, PaymentApp } from "@calcom/types/PaymentService";
@@ -163,6 +164,7 @@ export const confirmHandler = async ({ ctx, input }: ConfirmOptions) => {
       username: user.username || undefined,
       timeZone: user.timeZone,
       language: { translate: tOrganizer, locale: user.locale ?? "en" },
+      timeFormat: getDefaultUserTimeFormat(user.timeFormat)
     },
     attendees: attendeesList,
     location: booking.location ?? "",

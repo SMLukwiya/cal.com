@@ -12,6 +12,7 @@ import {
   WorkflowTriggerEvents,
 } from "@calcom/prisma/enums";
 import type { TrpcSessionUser } from "@calcom/trpc/server/trpc";
+import {getDefaultUserTimeFormat} from "@calcom/lib/timeFormat";
 
 import { TRPCError } from "@trpc/server";
 
@@ -29,6 +30,7 @@ export const createHandler = async ({ ctx, input }: CreateOptions) => {
   const { teamId } = input;
 
   const userId = ctx.user.id;
+  const timeFormat = getDefaultUserTimeFormat(ctx.user.timeFormat);
 
   if (teamId) {
     const team = await prisma.team.findFirst({
@@ -70,8 +72,8 @@ export const createHandler = async ({ ctx, input }: CreateOptions) => {
         stepNumber: 1,
         action: WorkflowActions.EMAIL_ATTENDEE,
         template: WorkflowTemplates.REMINDER,
-        reminderBody: emailReminderTemplate(true, WorkflowActions.EMAIL_ATTENDEE).emailBody,
-        emailSubject: emailReminderTemplate(true, WorkflowActions.EMAIL_ATTENDEE).emailSubject,
+        reminderBody: emailReminderTemplate(true, WorkflowActions.EMAIL_ATTENDEE, timeFormat).emailBody,
+        emailSubject: emailReminderTemplate(true, WorkflowActions.EMAIL_ATTENDEE, timeFormat).emailSubject,
         workflowId: workflow.id,
         sender: SENDER_NAME,
         numberVerificationPending: false,

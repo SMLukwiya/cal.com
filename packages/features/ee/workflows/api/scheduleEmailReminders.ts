@@ -8,7 +8,7 @@ import { getCalEventResponses } from "@calcom/features/bookings/lib/getCalEventR
 import { defaultHandler } from "@calcom/lib/server";
 import prisma from "@calcom/prisma";
 import { WorkflowActions, WorkflowMethods, WorkflowTemplates } from "@calcom/prisma/enums";
-import {TimeFormat} from "@calcom/lib/timeFormat";
+import {getDefaultUserTimeFormat} from "@calcom/lib/timeFormat";
 import { bookingMetadataSchema } from "@calcom/prisma/zod-utils";
 
 import type { VariablesType } from "../lib/reminders/templates/customTemplate";
@@ -171,7 +171,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let emailBodyEmpty = false;
 
-      const timeFormat = reminder.booking?.user?.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR;
+      const timeFormat = getDefaultUserTimeFormat(reminder.booking?.user?.timeFormat);
 
       if (reminder.workflowStep.reminderBody) {
         const { responses } = getCalEventResponses({

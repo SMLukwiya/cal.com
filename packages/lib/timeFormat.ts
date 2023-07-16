@@ -13,6 +13,10 @@ export enum TimeFormat {
   TWENTY_FOUR_HOUR = "HH:mm",
 }
 
+export const getDefaultUserTimeFormat = (timeFormat?: number | null) => {
+  return timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR;
+}
+
 export const setIs24hClockInLocalStorage = (is24h: boolean) =>
   localStorage.setItem(is24hLocalstorageKey, is24h.toString());
 

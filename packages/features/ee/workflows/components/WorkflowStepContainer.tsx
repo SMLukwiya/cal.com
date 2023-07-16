@@ -48,6 +48,7 @@ import smsReminderTemplate from "../lib/reminders/templates/smsReminderTemplate"
 import { whatsappReminderTemplate } from "../lib/reminders/templates/whatsapp";
 import type { FormValues } from "../pages/workflow";
 import { TimeTimeUnitInput } from "./TimeTimeUnitInput";
+import {getDefaultUserTimeFormat} from "@calcom/lib/timeFormat";
 
 type WorkflowStepProps = {
   step?: WorkflowStep;
@@ -64,7 +65,7 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
   const utils = trpc.useContext();
 
   const { step, form, reload, setReload, teamId } = props;
-  const userTimeFormat = user.data.timeFormat === 24 ? TimeFormat.TWENTY_FOUR_HOUR : TimeFormat.TWELVE_HOUR;
+  const userTimeFormat = getDefaultUserTimeFormat(user.data.timeFormat);
   const { data: _verifiedNumbers } = trpc.viewer.workflows.getVerifiedNumbers.useQuery(
     { teamId },
     { enabled: !!teamId }
