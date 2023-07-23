@@ -711,6 +711,9 @@ async function handleSeatedEventCancellation(
   const seatReference = bookingToDelete.seatsReferences.find(
     (reference) => reference.referenceUid === seatReferenceUid
   );
+  const workflowReminderForAttendee = bookingToDelete?.workflowReminders.find(
+    (reminder) => reminder.referenceUid === seatReferenceUid
+  );
 
   if (!seatReference) throw new HttpError({ statusCode: 400, message: "User not a part of this booking" });
 
@@ -756,6 +759,15 @@ async function handleSeatedEventCancellation(
     })
   );
   await Promise.all(promises);
+
+  // delete attendee's workReminder to prevent trigger after event cancellation
+  if (workflowReminderForAttendee) {
+    deleteScheduledEmailReminder(
+      workflowReminderForAttendee.id,
+      workflowReminderForAttendee.referenceId,
+      workflowReminderForAttendee.referenceUid
+    );
+  }
 
   return { success: true };
 }

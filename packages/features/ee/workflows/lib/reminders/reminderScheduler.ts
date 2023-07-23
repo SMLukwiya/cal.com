@@ -29,6 +29,7 @@ export interface ScheduleWorkflowRemindersArgs {
   isFirstRecurringEvent?: boolean;
   emailAttendeeSendToOverride?: string;
   hideBranding?: boolean;
+  seatReferenceUid?: string;
 }
 
 export const scheduleWorkflowReminders = async (args: ScheduleWorkflowRemindersArgs) => {
@@ -41,6 +42,7 @@ export const scheduleWorkflowReminders = async (args: ScheduleWorkflowRemindersA
     isFirstRecurringEvent = false,
     emailAttendeeSendToOverride = "",
     hideBranding,
+    seatReferenceUid,
   } = args;
   if (workflows.length > 0 && !requiresConfirmation) {
     for (const workflowReference of workflows) {
@@ -109,7 +111,8 @@ export const scheduleWorkflowReminders = async (args: ScheduleWorkflowRemindersA
               step.id,
               step.template,
               step.sender || SENDER_NAME,
-              hideBranding
+              hideBranding,
+              seatReferenceUid
             );
           } else if (isWhatsappAction(step.action)) {
             const sendTo =
