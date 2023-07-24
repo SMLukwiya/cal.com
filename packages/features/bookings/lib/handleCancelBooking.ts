@@ -711,9 +711,6 @@ async function handleSeatedEventCancellation(
   const seatReference = bookingToDelete.seatsReferences.find(
     (reference) => reference.referenceUid === seatReferenceUid
   );
-  const workflowReminderForAttendee = bookingToDelete?.workflowReminders.find(
-    (reminder) => reminder.referenceUid === seatReferenceUid
-  );
 
   if (!seatReference) throw new HttpError({ statusCode: 400, message: "User not a part of this booking" });
 
@@ -760,13 +757,30 @@ async function handleSeatedEventCancellation(
   );
   await Promise.all(promises);
 
-  // delete attendee's workReminder to prevent trigger after event cancellation
+  const workflowReminderForAttendee = bookingToDelete?.workflowReminders.find(
+    (reminder) => reminder.seatReferenceId === seatReferenceUid
+  );
+
   if (workflowReminderForAttendee) {
-    deleteScheduledEmailReminder(
-      workflowReminderForAttendee.id,
-      workflowReminderForAttendee.referenceId,
-      workflowReminderForAttendee.referenceUid
-    );
+    if (workflowReminderForAttendee.method === WorkflowMethods.EMAIL) {
+      deleteScheduledEmailReminder(
+        workflowReminderForAttendee.id,
+        workflowReminderForAttendee.referenceId,
+        seatReferenceUid
+      );
+    } else if (workflowReminderForAttendee.method === WorkflowMethods.SMS) {
+      deleteScheduledSMSReminder(
+        workflowReminderForAttendee.id,
+        workflowReminderForAttendee.referenceId,
+        seatReferenceUid
+      );
+    } else if (workflowReminderForAttendee.method === WorkflowMethods.WHATSAPP) {
+      deleteScheduledWhatsappReminder(
+        workflowReminderForAttendee.id,
+        workflowReminderForAttendee.referenceId,
+        seatReferenceUid
+      );
+    }
   }
 
   return { success: true };

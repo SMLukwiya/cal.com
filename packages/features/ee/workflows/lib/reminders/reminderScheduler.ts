@@ -75,7 +75,8 @@ export const scheduleWorkflowReminders = async (args: ScheduleWorkflowRemindersA
               step.sender || SENDER_ID,
               workflow.userId,
               workflow.teamId,
-              step.numberVerificationPending
+              step.numberVerificationPending,
+              seatReferenceUid
             );
           } else if (
             step.action === WorkflowActions.EMAIL_ATTENDEE ||
@@ -131,7 +132,8 @@ export const scheduleWorkflowReminders = async (args: ScheduleWorkflowRemindersA
               step.template,
               workflow.userId,
               workflow.teamId,
-              step.numberVerificationPending
+              step.numberVerificationPending,
+              seatReferenceUid
             );
           }
         }

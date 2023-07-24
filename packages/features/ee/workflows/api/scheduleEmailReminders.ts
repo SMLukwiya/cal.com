@@ -75,7 +75,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       },
     },
   });
-
   for (const reminder of remindersToCancel) {
     try {
       await client.request({

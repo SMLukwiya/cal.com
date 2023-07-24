@@ -1739,7 +1739,7 @@ async function handler(
         isRescheduleEvent: !!rescheduleUid,
         isFirstRecurringEvent: true,
         emailAttendeeSendToOverride: bookerEmail,
-        seatReferenceUid: evt.attendeeSeatId, // all the workflow steps in a single reminder will have the same referenceUid, so they are all cancelable at once.
+        seatReferenceUid: evt.attendeeSeatId,
       });
     } catch (error) {
       log.error("Error while scheduling workflow reminders", error);
@@ -2390,7 +2390,7 @@ async function handler(
       isRescheduleEvent: !!rescheduleUid,
       isFirstRecurringEvent: true,
       hideBranding: !!eventType.owner?.hideBranding,
-      seatReferenceUid: evt.attendeeSeatId, // all the workflow steps in a single reminder will have the same referenceUid, so they are all cancelable at once.
+      seatReferenceUid: evt.attendeeSeatId,
     });
   } catch (error) {
     log.error("Error while scheduling workflow reminders", error);

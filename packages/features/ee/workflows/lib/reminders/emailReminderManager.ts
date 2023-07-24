@@ -222,7 +222,7 @@ export const scheduleEmailReminder = async (
             scheduledDate: scheduledDate.toDate(),
             scheduled: true,
             referenceId: batchIdResponse[1].batch_id,
-            referenceUid: seatReferenceUid,
+            seatReferenceId: seatReferenceUid,
           },
         });
       } catch (error) {
@@ -237,7 +237,7 @@ export const scheduleEmailReminder = async (
           method: WorkflowMethods.EMAIL,
           scheduledDate: scheduledDate.toDate(),
           scheduled: false,
-          referenceUid: seatReferenceUid,
+          seatReferenceId: seatReferenceUid,
         },
       });
     }
@@ -247,7 +247,7 @@ export const scheduleEmailReminder = async (
 export const deleteScheduledEmailReminder = async (
   reminderId: number,
   referenceId: string | null,
-  seatReferenceUid?: string | null
+  seatReferenceUid?: string
 ) => {
   try {
     if (!referenceId) {
@@ -260,11 +260,10 @@ export const deleteScheduledEmailReminder = async (
       return;
     }
 
-    // cancel workflow reminder for an attendee. This will cancel all steps in that workflow reminder.
     if (seatReferenceUid) {
       await prisma.workflowReminder.updateMany({
         where: {
-          referenceUid: seatReferenceUid,
+          seatReferenceId: seatReferenceUid,
         },
         data: {
           cancelled: true,
