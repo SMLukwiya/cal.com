@@ -942,6 +942,8 @@ async function handler(
     {
       email: bookerEmail,
       name: fullName,
+      firstName: (typeof bookerName === "object" && (bookerName.firstName as string)) || "",
+      lastName: (typeof bookerName === "object" && (bookerName?.lastName as string)) || "",
       timeZone: reqBody.timeZone,
       language: { translate: tAttendees, locale: language ?? "en" },
     },
@@ -955,6 +957,8 @@ async function handler(
     guestArray.push({
       email: guest,
       name: "",
+      firstName: "",
+      lastName: "",
       timeZone: reqBody.timeZone,
       language: { translate: tGuests, locale: "en" },
     });
