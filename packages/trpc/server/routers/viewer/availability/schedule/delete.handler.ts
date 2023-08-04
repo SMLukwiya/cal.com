@@ -3,6 +3,7 @@ import { prisma } from "@calcom/prisma";
 import { TRPCError } from "@trpc/server";
 
 import type { TrpcSessionUser } from "../../../../trpc";
+import { isTeamSchedule } from "../util";
 import type { TDeleteInputSchema } from "./delete.schema";
 
 type DeleteOptions = {
@@ -24,7 +25,12 @@ export const deleteHandler = async ({ input, ctx }: DeleteOptions) => {
     },
   });
 
-  if (scheduleToDelete?.userId !== user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
+  // check if schedule is a team schedule
+  const scheduleIsTeamSchedule = await isTeamSchedule(user.id, prisma, input.scheduleId);
+
+  if (!scheduleIsTeamSchedule) {
+    if (scheduleToDelete?.userId !== user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
 
   // cannot remove this schedule if this is the last schedule remaining
   // if this is the last remaining schedule of the user then this would be the default schedule and so cannot remove it

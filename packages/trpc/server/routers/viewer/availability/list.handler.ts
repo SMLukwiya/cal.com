@@ -1,7 +1,7 @@
 import { prisma } from "@calcom/prisma";
 
 import type { TrpcSessionUser } from "../../../trpc";
-import { getDefaultScheduleId } from "./util";
+import { getDefaultScheduleId, getTeamSchedules } from "./util";
 
 type ListOptions = {
   ctx: {
@@ -27,6 +27,17 @@ export const listHandler = async ({ ctx }: ListOptions) => {
     },
   });
 
+  const teamSchedules = await getTeamSchedules(user.id, prisma);
+
+  const scheduleIds = schedules.map((schedule) => schedule.id);
+
+  // user who created the a team schedule already has the team schedule as part of their schedules, avoid duplicates.
+  const nonDuplicateTeamSchedules = teamSchedules.filter((schedule) =>
+    schedule ? !scheduleIds.includes(schedule.id) : false
+  );
+
+  const allSchedules = [...schedules, ...nonDuplicateTeamSchedules] as typeof schedules;
+
   const defaultScheduleId = await getDefaultScheduleId(user.id, prisma);
 
   if (!user.defaultScheduleId) {
@@ -41,7 +52,7 @@ export const listHandler = async ({ ctx }: ListOptions) => {
   }
 
   return {
-    schedules: schedules.map((schedule) => ({
+    schedules: allSchedules.map((schedule) => ({
       ...schedule,
       isDefault: schedule.id === defaultScheduleId,
     })),

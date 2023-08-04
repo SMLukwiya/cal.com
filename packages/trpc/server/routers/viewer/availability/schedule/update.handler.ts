@@ -4,7 +4,7 @@ import { prisma } from "@calcom/prisma";
 import { TRPCError } from "@trpc/server";
 
 import type { TrpcSessionUser } from "../../../../trpc";
-import { convertScheduleToAvailability, setupDefaultSchedule } from "../util";
+import { convertScheduleToAvailability, setupDefaultSchedule, isTeamSchedule } from "../util";
 import type { TUpdateInputSchema } from "./update.schema";
 
 type UpdateOptions = {
@@ -38,12 +38,13 @@ export const updateHandler = async ({ input, ctx }: UpdateOptions) => {
     },
   });
 
-  if (userSchedule?.userId !== user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
+  if (!userSchedule) throw new TRPCError({ code: "UNAUTHORIZED" });
 
-  if (!userSchedule || userSchedule.userId !== user.id) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-    });
+  // check if schedule is a team schedule
+  const scheduleIsTeamSchedule = await isTeamSchedule(user.id, prisma, userSchedule.id);
+
+  if (!scheduleIsTeamSchedule) {
+    if (userSchedule?.userId !== user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
   let updatedUser;

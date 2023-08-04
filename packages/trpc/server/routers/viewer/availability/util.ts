@@ -87,3 +87,50 @@ export const setupDefaultSchedule = async (userId: number, scheduleId: number, p
     },
   });
 };
+
+export const getTeamSchedules = async (userId: number, prisma: PrismaClient) => {
+  const membershipsWithTeamSchedules = await prisma.membership.findMany({
+    where: {
+      userId: userId,
+    },
+    select: {
+      team: {
+        select: {
+          eventTypes: {
+            select: {
+              schedule: {
+                select: {
+                  id: true,
+                  userId: true,
+                  name: true,
+                  availability: true,
+                  timeZone: true,
+                  eventType: {
+                    select: {
+                      _count: true,
+                      id: true,
+                      eventName: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // teamEvent has one-to-one relation to schedule
+  const teamSchedules = membershipsWithTeamSchedules
+    .map((membership) => membership.team.eventTypes)
+    .map((teamEventType) => teamEventType[0].schedule);
+
+  return teamSchedules;
+};
+
+export const isTeamSchedule = async (userId: number, prisma: PrismaClient, scheduleId?: number) => {
+  const teamSchedules = await getTeamSchedules(userId, prisma);
+  const teamScheduleFound = teamSchedules.find((teamSchedule) => teamSchedule?.id === scheduleId);
+  return teamScheduleFound ? true : false;
+};

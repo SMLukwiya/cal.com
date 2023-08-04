@@ -7,7 +7,7 @@ import type { TimeRange } from "@calcom/types/schedule";
 import { TRPCError } from "@trpc/server";
 
 import type { TrpcSessionUser } from "../../../../trpc";
-import { convertScheduleToAvailability, getDefaultScheduleId } from "../util";
+import { convertScheduleToAvailability, getDefaultScheduleId, isTeamSchedule } from "../util";
 import type { TGetInputSchema } from "./get.schema";
 
 type GetOptions = {
@@ -39,10 +39,21 @@ export const getHandler = async ({ ctx, input }: GetOptions) => {
       },
     },
   });
-  if (!schedule || (schedule.userId !== user.id && !input.isManagedEventType)) {
+  if (!schedule) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
     });
+  }
+
+  // check if schedule is a team schedule
+  const scheduleIsTeamSchedule = await isTeamSchedule(user.id, prisma, schedule.id);
+
+  if (!scheduleIsTeamSchedule) {
+    if (schedule.userId !== user.id && !input.isManagedEventType) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+      });
+    }
   }
   const timeZone = schedule.timeZone || user.timeZone;
 
